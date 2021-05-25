@@ -50,15 +50,19 @@ ENV BUILD_DEPS="python3-dev build-essential gfortran libssl-dev libffi-dev"
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
     apt-get install -yq --no-install-recommends ${BUILD_DEPS} && \
-    pip3 install --upgrade setuptools && \
-    pip3 install --upgrade pip==19.2.3 && \
-    pip3 install https://api.github.com/repos/yandex/yandex-tank/tarball/${BRANCH} && \
-    apt-get autoremove -y ${BUILD_DEPS} && \
+    python3 -m pip install --upgrade setuptools==41.0.1
+
+RUN python3 -m pip install --upgrade pip==19.2.3
+
+COPY . /app
+WORKDIR /app
+RUN python3 -m pip install .
+RUN python3 -m pip install gevent requests
+
+RUN apt-get autoremove -y ${BUILD_DEPS} && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* /tmp/* /var/tmp/* /root/.cache/*
 
-COPY files/bashrc /root/.bashrc
-COPY files/inputrc /root/.inputrc
 
 VOLUME ["/var/loadtest"]
 WORKDIR /var/loadtest
